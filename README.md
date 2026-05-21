@@ -70,7 +70,7 @@ GEMINI_API_KEY=TU_API_KEY_AQUI
 Para iniciar el sistema, simplemente ejecuta:
 
 ```powershell
-python Este_es_el_bueno_pecausa.py
+bot.py
 ```
 
 ### ¿Qué sucederá al iniciar?
