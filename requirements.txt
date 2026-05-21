@@ -1,0 +1,11 @@
+pandas
+numpy
+requests
+plotly
+rich
+google-genai
+python-dotenv
+python-binance
+pandas-ta
+sqlalchemy
+aiosqlite

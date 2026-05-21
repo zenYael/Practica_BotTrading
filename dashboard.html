@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alpha-Quant Advanced Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #080b11;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1500px;
+            margin: auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-area h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #a855f7 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .header-meta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .sentiment-badge {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .sync-badge {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(17, 24, 39, 0.5);
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            width: max-content;
+        }
+        
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-btn.active {
+            background: #a855f7;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .kpi-card {
+            background: rgba(17, 24, 39, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kpi-label {
+            font-size: 0.8em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .kpi-val {
+            font-size: 1.7em;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .kpi-val.profit { color: #00ff99; }
+        .kpi-val.loss { color: #ff0066; }
+        
+        .kpi-sub {
+            font-size: 0.8em;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .card {
+            background: rgba(17, 24, 39, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #f1f5f9;
+            border-left: 3px solid #a855f7;
+            padding-left: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(17, 24, 39, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        th {
+            background-color: rgba(255, 255, 255, 0.02);
+            color: #94a3b8;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .BUY { color: #00ff99; font-weight: bold; }
+        .SELL { color: #ff0066; font-weight: bold; }
+        .HOLD { color: #8892b0; font-weight: bold; }
+        
+        .ai-panel {
+            background-color: rgba(168, 85, 247, 0.05);
+            border-left: 4px solid #a855f7;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            line-height: 1.6;
+        }
+        
+        .ai-title {
+            color: #d8b4e2;
+            font-weight: bold;
+            font-size: 1.15em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-container {
+            min-height: 400px;
+            width: 100%;
+        }
+        
+        .market-chart-pair {
+            margin-bottom: 25px;
+            background: rgba(17, 24, 39, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        .pnl-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .connection-status {
+            font-size: 0.85em;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .status-connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        @media (max-width: 1024px) {
+            .grid-2col, .pnl-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="plotly.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>ALPHA-QUANT TRADING HUB v5.4</h1>
+            </div>
+            <div class="header-meta">
+                <div id="conn-status" class="connection-status status-disconnected">Conectando...</div>
+                <div class="sentiment-badge" id="kpi-sentiment">Sentimiento: --</div>
+                <div class="sync-badge" id="kpi-sync">Sincronizado: --</div>
+            </div>
+        </header>
+        
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Equidad Total</div>
+                <div class="kpi-val" id="kpi-equity">$0.00</div>
+                <div class="kpi-sub" id="kpi-cash">Efectivo: $0.00</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Retorno Total</div>
+                <div class="kpi-val" id="kpi-return">+0.00%</div>
+                <div class="kpi-sub">Desde inicio ($1,000.00)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Sharpe Ratio</div>
+                <div class="kpi-val" id="kpi-sharpe" style="color: #38bdf8;">0.00</div>
+                <div class="kpi-sub">Intervalo 15m (Anualizado)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Max Drawdown</div>
+                <div class="kpi-val" id="kpi-drawdown" style="color: #f43f5e;">0.00%</div>
+                <div class="kpi-sub">Caída máxima de equidad</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Win Rate</div>
+                <div class="kpi-val" id="kpi-winrate" style="color: #10b981;">0.0%</div>
+                <div class="kpi-sub" id="kpi-winloss">0 W - 0 L</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Profit Factor</div>
+                <div class="kpi-val" id="kpi-profitfactor" style="color: #a855f7;">0.00</div>
+                <div class="kpi-sub">Ratio Ganancias/Pérdidas</div>
+            </div>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-dashboard')">Panel de Control</button>
+            <button class="tab-btn" onclick="switchTab('tab-performance')">Rendimiento e Historial</button>
+            <button class="tab-btn" onclick="switchTab('tab-analytics')">Análisis Cuantitativo</button>
+        </div>
+        
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="ai-panel">
+                <div class="ai-title">✨ Gemini Executive Summary</div>
+                <div id="gemini-summary">Esperando análisis inicial...</div>
+            </div>
+            
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-title">Resumen de Posiciones Activas</div>
+                    <table>
+                        <thead>
+                            <tr><th>Activo</th><th>Precio Actual</th><th>Estrategia (PnL 60v)</th><th>Decisión</th></tr>
+                        </thead>
+                        <tbody id="active-positions-body">
+                            <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:10px;">Esperando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <div class="card-title">Composición de Cartera</div>
+                    <table>
+                        <thead>
+                            <tr><th>Activo</th><th>Cantidad</th><th>Valor Actual (USD)</th></tr>
+                        </thead>
+                        <tbody id="portfolio-composition-body">
+                            <tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:10px;">Esperando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Gráficos de Mercado en Tiempo Real</div>
+                <div class="market-charts-list">
+                    <div class="market-chart-pair">
+                        <h3 style="margin-top:0;color:#fff;">BTCUSDT (Velas 5s, EMA, Bandas Bollinger)</h3>
+                        <div id="price-BTCUSDT" class="chart-container"></div>
+                        <div id="rsi-BTCUSDT" class="chart-container" style="min-height:150px;"></div>
+                    </div>
+                    <div class="market-chart-pair">
+                        <h3 style="margin-top:0;color:#fff;">ETHUSDT (Velas 5s, EMA, Bandas Bollinger)</h3>
+                        <div id="price-ETHUSDT" class="chart-container"></div>
+                        <div id="rsi-ETHUSDT" class="chart-container" style="min-height:150px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 2: PERFORMANCE -->
+        <div id="tab-performance" class="tab-content">
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-title">Evolución del Capital vs Benchmarks</div>
+                    <div id="plotly-equity-curve" class="chart-container"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Rendimiento Acumulado por Estrategia</div>
+                    <div id="plotly-strategy-curve" class="chart-container"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Historial Completo de Operaciones</div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Activo</th>
+                                <th>Hora Compra</th>
+                                <th>Hora Venta</th>
+                                <th>Precio Compra</th>
+                                <th>Precio Venta</th>
+                                <th>Cantidad</th>
+                                <th>PnL (Retorno %)</th>
+                                <th>Estrategia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="closed-trades-body">
+                            <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px;">Aún no se han completado operaciones.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 3: ANALYTICS -->
+        <div id="tab-analytics" class="tab-content">
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-title">Distribución de Ganancias y Pérdidas</div>
+                    <div id="plotly-pnl-distribution" class="chart-container"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Rendimiento por Activo (PnL USD)</div>
+                    <div id="plotly-asset-pnl" class="chart-container"></div>
+                </div>
+            </div>
+            
+            <div class="pnl-stats-grid">
+                <div class="card">
+                    <div class="card-title">Métricas de Riesgo y Operaciones</div>
+                    <table>
+                        <tbody>
+                            <tr><td>Número Total de Operaciones</td><td><strong id="metric-total-trades">0</strong></td></tr>
+                            <tr><td>Operaciones Ganadoras</td><td class="BUY"><strong id="metric-winning-trades">0</strong></td></tr>
+                            <tr><td>Operaciones Perdedoras</td><td class="SELL"><strong id="metric-losing-trades">0</strong></td></tr>
+                            <tr><td>Riesgo por Operación (Pérdida Promedio)</td><td class="SELL"><strong id="metric-avg-loss">0.00%</strong></td></tr>
+                            <tr><td>Volatilidad de Operaciones (Desv. Est.)</td><td><strong id="metric-std-dev">0.00%</strong></td></tr>
+                            <tr><td>Rendimiento Máximo en un Trade</td><td class="BUY"><strong id="metric-max-return">+0.00%</strong></td></tr>
+                            <tr><td>Pérdida Máxima en un Trade</td><td class="SELL"><strong id="metric-min-return">+0.00%</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Desglose de PnL por Activo y Estrategia</div>
+                    <div class="grid-2col" style="margin-bottom:0; gap:10px;">
+                        <div>
+                            <h4 style="margin-top:0;margin-bottom:8px;color:#94a3b8;">Por Activo</h4>
+                            <table>
+                                <thead>
+                                    <tr><th>Activo</th><th>PnL Total</th></tr>
+                                </thead>
+                                <tbody id="asset-pnl-body">
+                                    <tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:10px;">Sin datos.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h4 style="margin-top:0;margin-bottom:8px;color:#94a3b8;">Por Estrategia</h4>
+                            <table>
+                                <thead>
+                                    <tr><th>Estrategia</th><th>PnL Total</th></tr>
+                                </thead>
+                                <tbody id="strategy-pnl-body">
+                                    <tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:10px;">Sin datos.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Función para alternar pestañas
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Forzar reajuste de tamaño de Plotly al mostrarse
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 10);
+        }
+        
+        // Función para actualizar todos los elementos del DOM de la UI
+        function updateUI(payload) {
+            // Badges
+            document.getElementById('kpi-sentiment').innerText = 'Sentimiento: ' + payload.sentiment;
+            document.getElementById('kpi-sync').innerText = 'Sincronizado: ' + payload.sync_time;
+            
+            // KPI Cards
+            document.getElementById('kpi-equity').innerText = '$' + payload.current_portfolio_val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('kpi-cash').innerText = 'Efectivo: $' + payload.wallet_balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const retEl = document.getElementById('kpi-return');
+            retEl.innerText = (payload.total_return_pct >= 0 ? '+' : '') + payload.total_return_pct.toFixed(2) + '%';
+            retEl.className = 'kpi-val ' + (payload.total_return_pct >= 0 ? 'profit' : 'loss');
+            
+            document.getElementById('kpi-sharpe').innerText = payload.metrics.sharpe_ratio.toFixed(2);
+            document.getElementById('kpi-drawdown').innerText = payload.metrics.max_drawdown.toFixed(2) + '%';
+            document.getElementById('kpi-winrate').innerText = payload.metrics.win_rate.toFixed(1) + '%';
+            document.getElementById('kpi-winloss').innerText = payload.metrics.winning_trades + ' W - ' + payload.metrics.losing_trades + ' L';
+            
+            const pf = payload.metrics.profit_factor;
+            const pf_str = (pf === null || pf === Infinity || pf === "Infinity" || isNaN(pf)) ? '∞' : pf.toFixed(2);
+            document.getElementById('kpi-profitfactor').innerText = pf_str;
+            
+            // AI Panel
+            document.getElementById('gemini-summary').innerHTML = payload.executive_summary.replace(/\n/g, '<br>');
+            
+            // Active Positions Table
+            let activeRows = '';
+            payload.summary.forEach(s => {
+                activeRows += `<tr><td>${s.Sym}</td><td>${s.Price}</td><td>${s.Model}</td><td class="${s.Signal}">${s.Signal}</td></tr>`;
+            });
+            if (payload.summary.length === 0) {
+                activeRows = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:10px;">Sin posiciones activas.</td></tr>';
+            }
+            document.getElementById('active-positions-body').innerHTML = activeRows;
+            
+            // Portfolio Composition Table
+            let btcQty = payload.wallet_assets.BTC || 0.0;
+            let ethQty = payload.wallet_assets.ETH || 0.0;
+            let btcVal = 0.0;
+            let ethVal = 0.0;
+            
+            payload.summary.forEach(s => {
+                if (s.Sym.startsWith('BTC')) {
+                    btcVal = btcQty * parseFloat(s.Price.replace('$', '').replace(/,/g, ''));
+                } else if (s.Sym.startsWith('ETH')) {
+                    ethVal = ethQty * parseFloat(s.Price.replace('$', '').replace(/,/g, ''));
+                }
+            });
+            
+            let compRows = `
+                <tr><td>USD (Efectivo)</td><td>$${payload.wallet_balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td>$${payload.wallet_balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>
+                <tr><td>BTC</td><td>${btcQty.toFixed(6)}</td><td>$${btcVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>
+                <tr><td>ETH</td><td>${ethQty.toFixed(6)}</td><td>$${ethVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>
+            `;
+            document.getElementById('portfolio-composition-body').innerHTML = compRows;
+            
+            // Closed Trades Table
+            let tradesRows = '';
+            payload.closed_trades.forEach(t => {
+                const pnlClass = t.pnl_usd >= 0 ? 'BUY' : 'SELL';
+                tradesRows += `
+                <tr>
+                    <td>${t.symbol}</td>
+                    <td>${t.buy_time}</td>
+                    <td>${t.sell_time}</td>
+                    <td>$${t.buy_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>$${t.sell_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${t.amount.toFixed(6)}</td>
+                    <td class="${pnlClass}">$${(t.pnl_usd >= 0 ? '+' : '')}${t.pnl_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${(t.return_pct >= 0 ? '+' : '')}${t.return_pct.toFixed(2)}%)</td>
+                    <td>${t.strategy}</td>
+                </tr>
+                `;
+            });
+            if (payload.closed_trades.length === 0) {
+                tradesRows = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px;">Aún no se han completado operaciones.</td></tr>';
+            }
+            document.getElementById('closed-trades-body').innerHTML = tradesRows;
+            
+            // Risk and Trade Metrics
+            let returns = payload.closed_trades.map(t => t.return_pct);
+            let maxRet = returns.length > 0 ? Math.max(...returns) : 0.0;
+            let minRet = returns.length > 0 ? Math.min(...returns) : 0.0;
+            
+            document.getElementById('metric-total-trades').innerText = payload.metrics.total_trades;
+            document.getElementById('metric-winning-trades').innerText = payload.metrics.winning_trades;
+            document.getElementById('metric-losing-trades').innerText = payload.metrics.losing_trades;
+            document.getElementById('metric-avg-loss').innerText = payload.metrics.risk_per_trade_avg.toFixed(2) + '%';
+            document.getElementById('metric-std-dev').innerText = payload.metrics.risk_per_trade_std.toFixed(2) + '%';
+            document.getElementById('metric-max-return').innerText = (maxRet >= 0 ? '+' : '') + maxRet.toFixed(2) + '%';
+            document.getElementById('metric-min-return').innerText = (minRet >= 0 ? '+' : '') + minRet.toFixed(2) + '%';
+            
+            // Asset PnL breakdown
+            let assetPnlRows = '';
+            for (const [sym, pnl] of Object.entries(payload.metrics.pnl_by_asset || {})) {
+                const pnlClass = pnl >= 0 ? 'BUY' : 'SELL';
+                assetPnlRows += `<tr><td>${sym}</td><td class="${pnlClass}">$${(pnl >= 0 ? '+' : '')}${pnl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+            }
+            if (assetPnlRows === '') {
+                assetPnlRows = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:10px;">Sin datos por activo.</td></tr>';
+            }
+            document.getElementById('asset-pnl-body').innerHTML = assetPnlRows;
+            
+            // Strategy PnL breakdown
+            let strategyPnlRows = '';
+            for (const [strat, pnl] of Object.entries(payload.metrics.pnl_by_strategy || {})) {
+                const pnlClass = pnl >= 0 ? 'BUY' : 'SELL';
+                strategyPnlRows += `<tr><td>${strat}</td><td class="${pnlClass}">$${(pnl >= 0 ? '+' : '')}${pnl.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+            }
+            if (strategyPnlRows === '') {
+                strategyPnlRows = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:10px;">Sin datos por estrategia.</td></tr>';
+            }
+            document.getElementById('strategy-pnl-body').innerHTML = strategyPnlRows;
+            
+            // Update Plotly charts
+            renderCharts(payload);
+        }
+        
+        function renderCharts(payload) {
+            const marketData = payload.market_data;
+            const equityCurve = payload.equity_curve;
+            const btcBh = payload.btc_bh;
+            const ethBh = payload.eth_bh;
+            const strategyComparison = payload.strategy_comparison;
+            const closedTrades = payload.closed_trades;
+            const metrics = payload.metrics;
+            
+            // 1. Candlestick charts for active symbols
+            Object.keys(marketData).forEach(symbol => {
+                const data = marketData[symbol];
+                if (!data.times || data.times.length === 0) return;
+                
+                const traceCandle = {
+                    x: data.times,
+                    open: data.open,
+                    high: data.high,
+                    low: data.low,
+                    close: data.close,
+                    type: 'candlestick',
+                    name: 'Precio',
+                    increasing: { line: { color: '#00ff99', width: 1.5 }, fillcolor: '#00ff99' },
+                    decreasing: { line: { color: '#ff0066', width: 1.5 }, fillcolor: '#ff0066' }
+                };
+                
+                const traceEma = {
+                    x: data.times,
+                    y: data.ema_slow,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Slow',
+                    line: { color: '#00e6e6', width: 1.5 }
+                };
+                
+                const traceBbUpper = {
+                    x: data.times,
+                    y: data.bb_upper,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'BB Upper',
+                    line: { color: 'rgba(255, 255, 255, 0.08)', width: 1 },
+                    hoverinfo: 'skip'
+                };
+                
+                const traceBbLower = {
+                    x: data.times,
+                    y: data.bb_lower,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'BB Lower',
+                    fill: 'tonexty',
+                    fillcolor: 'rgba(255, 255, 255, 0.01)',
+                    line: { color: 'rgba(255, 255, 255, 0.08)', width: 1 },
+                    hoverinfo: 'skip'
+                };
+                
+                const buyX = [];
+                const buyY = [];
+                const sellX = [];
+                const sellY = [];
+                
+                data.signals.forEach((s, idx) => {
+                    if (s.sig === 'BUY') {
+                        buyX.push(data.times[idx]);
+                        buyY.push(data.close[idx] * 0.998);
+                    } else if (s.sig === 'SELL') {
+                        sellX.push(data.times[idx]);
+                        sellY.push(data.close[idx] * 1.002);
+                    }
+                });
+                
+                const traceBuy = {
+                    x: buyX,
+                    y: buyY,
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: 'COMPRA',
+                    marker: { symbol: 'triangle-up', size: 14, color: '#00ff99', line: { width: 1.5, color: '#111' } }
+                };
+                
+                const traceSell = {
+                    x: sellX,
+                    y: sellY,
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: 'VENTA',
+                    marker: { symbol: 'triangle-down', size: 14, color: '#ff0066', line: { width: 1.5, color: '#111' } }
+                };
+                
+                const layoutPrice = {
+                    template: 'plotly_dark',
+                    height: 350,
+                    margin: { l: 50, r: 20, t: 20, b: 30 },
+                    xaxis: { rangeslider: { visible: false }, showgrid: true, gridcolor: '#1e293b' },
+                    yaxis: { showgrid: true, gridcolor: '#1e293b' },
+                    plot_bgcolor: '#080b11',
+                    paper_bgcolor: '#080b11',
+                    showlegend: true,
+                    legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' }
+                };
+                
+                Plotly.react(`price-${symbol}`, [traceCandle, traceEma, traceBbUpper, traceBbLower, traceBuy, traceSell], layoutPrice);
+                
+                const traceRsi = {
+                    x: data.times,
+                    y: data.rsi,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'RSI',
+                    line: { color: '#ff9900', width: 1.5 }
+                };
+                
+                const layoutRsi = {
+                    template: 'plotly_dark',
+                    height: 150,
+                    margin: { l: 50, r: 20, t: 10, b: 35 },
+                    xaxis: { showgrid: true, gridcolor: '#1e293b' },
+                    yaxis: { range: [0, 100], showgrid: true, gridcolor: '#1e293b' },
+                    plot_bgcolor: '#080b11',
+                    paper_bgcolor: '#080b11',
+                    shapes: [
+                        { type: 'line', y0: 70, y1: 70, x0: data.times[0], x1: data.times[data.times.length-1], line: { color: '#ff0066', width: 1.5, dash: 'dot' } },
+                        { type: 'line', y0: 30, y1: 30, x0: data.times[0], x1: data.times[data.times.length-1], line: { color: '#00ff99', width: 1.5, dash: 'dot' } }
+                    ]
+                };
+                
+                Plotly.react(`rsi-${symbol}`, [traceRsi], layoutRsi);
+            });
+            
+            // 2. Equity Curve Chart
+            if (equityCurve && equityCurve.length > 0) {
+                const eqX = equityCurve.map(p => p.x);
+                const eqY = equityCurve.map(p => p.y);
+                const btcBhY = btcBh.map(p => p.y);
+                const ethBhY = ethBh.map(p => p.y);
+                
+                const traceEq = {
+                    x: eqX,
+                    y: eqY,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Capital AutoML',
+                    line: { color: '#a855f7', width: 2.5 }
+                };
+                
+                const traceBtcBh = {
+                    x: eqX,
+                    y: btcBhY,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Buy & Hold BTC',
+                    line: { color: '#f59e0b', width: 1.5, dash: 'dashdot' }
+                };
+                
+                const traceEthBh = {
+                    x: eqX,
+                    y: ethBhY,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Buy & Hold ETH',
+                    line: { color: '#06b6d4', width: 1.5, dash: 'dashdot' }
+                };
+                
+                const layoutEq = {
+                    template: 'plotly_dark',
+                    margin: { l: 50, r: 20, t: 20, b: 40 },
+                    xaxis: { showgrid: true, gridcolor: '#1e293b' },
+                    yaxis: { showgrid: true, gridcolor: '#1e293b' },
+                    plot_bgcolor: '#080b11',
+                    paper_bgcolor: '#080b11',
+                    legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' }
+                };
+                
+                Plotly.react('plotly-equity-curve', [traceEq, traceBtcBh, traceEthBh], layoutEq);
+            }
+            
+            // 3. Strategy Comparison Chart
+            if (strategyComparison && strategyComparison.timestamps) {
+                const stratTimes = strategyComparison.timestamps;
+                const tracesStrat = [
+                    { x: stratTimes, y: strategyComparison.Scalping, name: 'Scalping RSI', type: 'scatter', mode: 'lines', line: { color: '#ef4444', width: 1.5 } },
+                    { x: stratTimes, y: strategyComparison.Cross, name: 'EMA Cross', type: 'scatter', mode: 'lines', line: { color: '#10b981', width: 1.5 } },
+                    { x: stratTimes, y: strategyComparison.Volatility, name: 'BB Volatility', type: 'scatter', mode: 'lines', line: { color: '#f59e0b', width: 1.5 } },
+                    { x: stratTimes, y: strategyComparison.AutoML, name: 'AutoML (Combinado)', type: 'scatter', mode: 'lines', line: { color: '#a855f7', width: 2.5 } }
+                ];
+                
+                const layoutStrat = {
+                    template: 'plotly_dark',
+                    margin: { l: 50, r: 20, t: 20, b: 40 },
+                    xaxis: { showgrid: true, gridcolor: '#1e293b' },
+                    yaxis: { title: 'Retorno Acumulado (%)', showgrid: true, gridcolor: '#1e293b' },
+                    plot_bgcolor: '#080b11',
+                    paper_bgcolor: '#080b11',
+                    legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' }
+                };
+                
+                Plotly.react('plotly-strategy-curve', tracesStrat, layoutStrat);
+            }
+            
+            // 4. Histogram Chart
+            const pnlVals = closedTrades.map(t => t.return_pct);
+            if (pnlVals.length > 0) {
+                const traceHist = {
+                    x: pnlVals,
+                    type: 'histogram',
+                    name: 'Operaciones',
+                    marker: {
+                        color: '#a855f7',
+                        line: { color: '#111', width: 1 }
+                    },
+                    opacity: 0.75
+                };
+                
+                const layoutHist = {
+                    template: 'plotly_dark',
+                    margin: { l: 40, r: 20, t: 20, b: 40 },
+                    xaxis: { title: 'Retorno por Operación (%)', showgrid: true, gridcolor: '#1e293b' },
+                    yaxis: { title: 'Frecuencia', showgrid: true, gridcolor: '#1e293b' },
+                    plot_bgcolor: '#080b11',
+                    paper_bgcolor: '#080b11'
+                };
+                
+                Plotly.react('plotly-pnl-distribution', [traceHist], layoutHist);
+            } else {
+                document.getElementById('plotly-pnl-distribution').innerHTML = '<div style="text-align:center;padding:50px;color:#94a3b8;">Aún no hay suficientes operaciones cerradas para el histograma.</div>';
+            }
+            
+            // 5. PnL by Asset Bar Chart
+            const assetsPnL = metrics.pnl_by_asset;
+            if (assetsPnL) {
+                const assetNames = Object.keys(assetsPnL);
+                const assetPnlValues = Object.values(assetsPnL);
+                
+                if (assetNames.length > 0) {
+                    const traceBar = {
+                        x: assetNames,
+                        y: assetPnlValues,
+                        type: 'bar',
+                        marker: {
+                            color: assetPnlValues.map(v => v >= 0 ? '#10b981' : '#ef4444')
+                        }
+                    };
+                    
+                    const layoutBar = {
+                        template: 'plotly_dark',
+                        margin: { l: 50, r: 20, t: 20, b: 40 },
+                        xaxis: { showgrid: false },
+                        yaxis: { title: 'PnL Acumulado (USD)', showgrid: true, gridcolor: '#1e293b' },
+                        plot_bgcolor: '#080b11',
+                        paper_bgcolor: '#080b11'
+                    };
+                    
+                    Plotly.react('plotly-asset-pnl', [traceBar], layoutBar);
+                } else {
+                    document.getElementById('plotly-asset-pnl').innerHTML = '<div style="text-align:center;padding:50px;color:#94a3b8;">Sin datos de PnL por activo.</div>';
+                }
+            }
+        }
+        
+        // WebSocket Connection Management
+        let socket = null;
+        function connectWS() {
+            const statusEl = document.getElementById('conn-status');
+            statusEl.innerText = 'Conectando...';
+            statusEl.className = 'connection-status status-disconnected';
+            
+            const wsUri = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws';
+            socket = new WebSocket(wsUri);
+            
+            socket.onopen = () => {
+                console.log('Conectado al servidor WebSocket');
+                statusEl.innerText = 'Conectado';
+                statusEl.className = 'connection-status status-connected';
+            };
+            
+            socket.onmessage = (event) => {
+                try {
+                    const payload = JSON.parse(event.data);
+                    updateUI(payload);
+                } catch (e) {
+                    console.error('Error al procesar mensaje JSON:', e);
+                }
+            };
+            
+            socket.onclose = () => {
+                console.log('Conexión perdida. Intentando reconectar en 2 segundos...');
+                statusEl.innerText = 'Desconectado';
+                statusEl.className = 'connection-status status-disconnected';
+                setTimeout(connectWS, 2000);
+            };
+            
+            socket.onerror = (err) => {
+                console.error('Error en WebSocket:', err);
+                socket.close();
+            };
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            connectWS();
+        });
+    </script>
+</body>
+</html>
