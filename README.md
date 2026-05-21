@@ -15,7 +15,7 @@ Antes de comenzar, asegúrate de tener instalado:
 ## 2. Preparación de Archivos
 
 Copia los siguientes archivos de tu proyecto original a una nueva carpeta en la otra PC:
-*   `Este_es_el_bueno_pecausa.py` (Script principal)
+*   `bot.py` (Script principal)
 *   `database.py` (Gestor de base de datos)
 *   `.env` (Archivo de configuración con tu API Key)
 *   `plotly.min.js` (Para que el dashboard funcione sin internet)
